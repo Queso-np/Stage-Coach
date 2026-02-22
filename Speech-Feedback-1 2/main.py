@@ -39,7 +39,7 @@ def clean_text(text: str) -> str:
         text = re.sub(r"{\\.*?}|\\[a-zA-Z]+\d* ?", " ", text)
         text = text.replace("{", " ").replace("}", " ")
 
-    # Remove weird control characters
+    # Removes weird control characters
     text = "".join(
         ch if ch == "\n" or ch == "\t" or 32 <= ord(ch) <= 126 else " "
         for ch in text
@@ -104,6 +104,7 @@ def clean_text_for_display(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
+#Creates the appropriate response on the type of speech 
 def _rubric_scores(speech_type: str, text: str):
     # Quick heuristic rubric (0-5)
     t = text.lower()
@@ -145,6 +146,7 @@ def _rubric_scores(speech_type: str, text: str):
         "Takeaway": clamp(takeaway),
     }
 
+#creates responses based on the type of goal they want
 def _tone_wrap(style: str, goal: str, msg: str) -> str:
     if not msg:
         return msg
@@ -166,20 +168,19 @@ def _tone_wrap(style: str, goal: str, msg: str) -> str:
 def _simplify(complexity: str, msg: str) -> str:
     if complexity == "standard":
         return msg
-    if complexity == "simplified":
-        # shorter, simpler
+    if complexity == "simplified":        
         msg = msg.replace("opportunities", "chances")
         msg = msg.replace("structure", "order")
         msg = msg.replace("audience", "people listening")
         return msg
     if complexity == "esl":
-        # clearer, slower language
         msg = msg.replace("warrant", "reason")
         msg = msg.replace("signposting", "clear transitions")
         msg = msg.replace("impact", "why it matters")
         return msg
     return msg
 
+#simulates AI feedback
 def ai_feedback(speech_type: str, audience: str, style: str, text: str, complexity="standard", goal="confidence", rubric_mode="on") -> str:
     text_clean = clean_text_for_display(text)
     sents = _sentences(text_clean)
@@ -192,7 +193,6 @@ def ai_feedback(speech_type: str, audience: str, style: str, text: str, complexi
     has_emotion = any(w.lower() in EMOTION_WORDS for w in words)
     has_evidence = any(cue in text_clean.lower() for cue in EVIDENCE_CUES)
 
-    # Safer “snippets”
     if sents:
         q1 = " ".join(sents[0].split()[:12])
         q2 = " ".join(sents[min(1, len(sents)-1)].split()[:12])
@@ -329,11 +329,13 @@ def ai_feedback(speech_type: str, audience: str, style: str, text: str, complexi
         )
 
 # ---------- Routes ----------
+
+#Opening page
 @app.route("/")
 def home():
     return render_template("greeting.html")
 
-
+#actual application
 @app.route("/feedback")
 def feedback_page():
     return render_template("index.html")
