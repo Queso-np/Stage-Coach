@@ -344,6 +344,7 @@
       fd.append("goal", goal);
       fd.append("rubricMode", rubricMode);
 
+      // simulates AI thinking
       try {
         const res = await fetch("/analyze", { method: "POST", body: fd });
 
