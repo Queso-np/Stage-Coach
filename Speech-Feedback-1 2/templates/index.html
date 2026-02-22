@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Speech Feedback</title>
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --text: #eaf0ff;
+      --muted: rgba(234,240,255,.75);
+      --border: rgba(255,255,255,.12);
+      --accent: #7c3aed;
+      --accent2:#22c55e;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.35), transparent 55%),
+        radial-gradient(900px 600px at 80% 30%, rgba(34,197,94,.22), transparent 55%),
+        radial-gradient(900px 600px at 50% 90%, rgba(59,130,246,.18), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+      padding: 32px 18px 60px;
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; }
+
+    .hero{
+      display:flex; gap:18px; align-items:flex-start; justify-content:space-between;
+      padding: 22px 22px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .hero h1{ margin:0; font-size: 28px; letter-spacing: .2px; }
+    .hero p{ margin: 8px 0 0; color: var(--muted); line-height:1.5; }
+    .badges{ display:flex; flex-wrap:wrap; gap:10px; margin-top: 12px; }
+    .badge{
+      font-size:12px; color: var(--muted);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      padding: 7px 10px; border-radius: 999px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    @media (min-width: 860px){
+      .grid{ grid-template-columns: 2.2fr .8fr; }
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 860px){
+      .row{ grid-template-columns: 1fr 1.5fr 1fr; }
+    }
+
+    label{
+      display:block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    select, input[type="text"]{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus{
+      border-color: rgba(124,58,237,.6);
+      box-shadow: 0 0 0 4px rgba(124,58,237,.18);
+    }
+
+    /* Make dropdowns taller / easier to read */
+    select{
+      min-height: 52px;
+      padding: 14px 16px;
+      font-size: 16px;
+    }
+
+    /* Windows dropdown option readability */
+    select option {
+      color: #000 !important;
+      background-color: #fff !important;
+    }
+
+    .filebox{
+      border: 1px dashed rgba(255,255,255,.22);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding: 14px;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    .filebox small{ color: var(--muted); display:block; margin-top:4px; }
+    input[type="file"]{
+      width: 100%;
+      color: var(--muted);
+    }
+
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top: 14px;
+    }
+    button{
+      appearance:none; border:none;
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 650;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      box-shadow: 0 12px 30px rgba(124,58,237,.25);
+    }
+    button:disabled{
+      opacity:.6; cursor:not-allowed;
+    }
+    .btn-ghost{
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      box-shadow:none;
+    }
+    .hint{ color: var(--muted); font-size: 13px; }
+
+    .output{
+      white-space: pre-wrap;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 360px;
+      line-height: 1.55;
+      color: #eef2ff;
+      overflow:auto;
+    }
+    .status{
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .dot{
+      width:8px; height:8px; border-radius: 999px; background: var(--accent2);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.18);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>🎭🗣️ Speech Feedback</h1>
+        <p>Upload your script, pick the speech type, describe the audience, and get structured feedback you can use on your next take.</p>
+        <div class="badges">
+          <span class="badge">Debate • Monologue • Public Speech</span>
+          <span class="badge">Audience-aware coaching</span>
+        </div>
+      </div>
+      <div class="pill"><span class="dot"></span>Ready for input</div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Inputs -->
+      <div class="card">
+        <form id="coachForm">
+          <!-- File upload -->
+          <div style="margin-bottom:12px;">
+            <label for="scriptFile">Upload your script file</label>
+            <div class="filebox">
+              <div style="flex:1;">
+                <input id="scriptFile" name="scriptFile" type="file" accept=".txt,.pdf,.doc,.docx" required />
+                <small>Accepted: .txt, .pdf, .doc, .docx</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row A: Speech type + Style + (blank spacer for alignment) -->
+          <div class="row">
+            <div>
+              <label for="speechType">Type of Speech</label>
+              <select id="speechType" name="speechType" required>
+                <option value="" selected disabled>Type of Speech</option>
+                <option value="debate">Debate</option>
+                <option value="monologue">Monologue</option>
+                <option value="public_speech">Public Speech</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="style">Feedback Style</label>
+              <select id="style" name="style">
+                <option value="balanced" selected>Balanced</option>
+                <option value="strict">Strict / Coach-like</option>
+                <option value="supportive">Supportive</option>
+              </select>
+            </div>
+
+            <div></div>
+          </div>
+
+          <!-- Row B: Accessibility/advanced dropdowns -->
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <label for="complexity">Feedback Complexity</label>
+              <select id="complexity" name="complexity" required>
+                <option value="standard" selected>Standard</option>
+                <option value="simplified">Simplified (Middle school)</option>
+                <option value="esl">ESL-friendly</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="goal">Performance Goal</label>
+              <select id="goal" name="goal" required>
+                <option value="confidence" selected>Confidence boost</option>
+                <option value="technical">Technical improvement</option>
+                <option value="competition">Competition prep</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="rubricMode">Rubric Mode</label>
+              <select id="rubricMode" name="rubricMode">
+                <option value="on" selected>Show rubric scores</option>
+                <option value="off">Hide rubric scores</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Audience (full width row) -->
+          <div style="margin-top:14px;">
+            <label for="audience">Audience Selection</label>
+            <input
+              id="audience"
+              name="audience"
+              type="text"
+              placeholder='e.g., "Judges who value evidence" / "A skeptical opponent" / "A modern comedy audience"'
+              required
+            />
+          </div>
+
+          <div class="actions">
+            <button id="goBtn" type="submit">Generate Feedback</button>
+            <button class="btn-ghost" type="button" id="clearBtn">Clear Output</button>
+            <span class="hint">Tip: Keep the file short for faster demos.</span>
+          </div>
+
+          <div class="status" id="status"></div>
+        </form>
+      </div>
+
+      <!-- RIGHT: Output -->
+      <div class="card">
+        <label>AI Advice Output</label>
+        <div class="output" id="outputBox">Your feedback will appear here…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("coachForm");
+    const outputBox = document.getElementById("outputBox");
+    const statusEl = document.getElementById("status");
+    const goBtn = document.getElementById("goBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    clearBtn.addEventListener("click", () => {
+      outputBox.textContent = "Your feedback will appear here…";
+      statusEl.textContent = "";
+      form.reset();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fileInput = document.getElementById("scriptFile");
+      const speechType = document.getElementById("speechType").value;
+      const audience = document.getElementById("audience").value.trim();
+      const style = document.getElementById("style").value;
+      const complexity = document.getElementById("complexity").value;
+      const goal = document.getElementById("goal").value;
+      const rubricMode = document.getElementById("rubricMode").value;
+
+      if (!fileInput.files?.length) {
+        statusEl.textContent = "Please upload a script file first.";
+        return;
+      }
+      if (!speechType) {
+        statusEl.textContent = "Please select a speech type.";
+        return;
+      }
+      if (!audience) {
+        statusEl.textContent = "Please describe the audience.";
+        return;
+      }
+
+      goBtn.disabled = true;
+      statusEl.textContent = "Sending to AI…";
+      outputBox.textContent = "Working…";
+
+      const fd = new FormData();
+      fd.append("scriptFile", fileInput.files[0]);
+      fd.append("speechType", speechType);
+      fd.append("audience", audience);
+      fd.append("style", style);
+      fd.append("complexity", complexity);
+      fd.append("goal", goal);
+      fd.append("rubricMode", rubricMode);
+
+      try {
+        const res = await fetch("/analyze", { method: "POST", body: fd });
+
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          throw new Error(`Server error ${res.status}. ${txt}`.trim());
+        }
+
+        const data = await res.json();
+
+        const steps = [
+          { text: "Processing input", duration: 1000 },
+          { text: "Thinking deeply", duration: 3000 },
+          { text: "Analyzing clarity", duration: 2000 },
+          { text: "Evaluating audience alignment", duration: 1500 },
+          { text: "Generating checklist", duration: 500 }
+        ];
+
+        function animateDots(baseText, duration) {
+          return new Promise(resolve => {
+            let dots = 0;
+            const interval = setInterval(() => {
+              dots = (dots + 1) % 4;
+              outputBox.textContent = baseText + ".".repeat(dots);
+            }, 400);
+
+            setTimeout(() => {
+              clearInterval(interval);
+              resolve();
+            }, duration);
+          });
+        }
+
+        for (let step of steps) {
+          await animateDots(step.text, step.duration);
+        }
+
+        outputBox.textContent = data.feedback ?? "No feedback returned.";
+        statusEl.textContent = "Feedback generated.";
+      } catch (err) {
+        outputBox.textContent =
+          "Could not generate feedback yet.\n\n" +
+          "Error: " + (err?.message || err);
+        statusEl.textContent = "Error.";
+      } finally {
+        goBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
